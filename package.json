@@ -1,0 +1,36 @@
+{
+  "name": "job-portal-backend",
+  "version": "1.0.0",
+  "description": "A backend REST API based server for a job portal",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node src/server.js",
+    "test": "cross-env NODE_ENV=test mocha",
+    "start": "cross-env NODE_ENV=production node src/server.js"
+  },
+  "keywords": [
+    "job-portal",
+    "rest",
+    "api"
+  ],
+  "type": "module",
+  "author": "azi0s",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.5.2",
+    "validator": "^13.12.0",
+    "winston": "^3.13.1"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "mocha": "^10.7.0",
+    "nodemon": "^3.1.4",
+    "supertest": "^7.0.0"
+  }
+}
