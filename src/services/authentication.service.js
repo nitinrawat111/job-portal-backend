@@ -7,14 +7,14 @@ import { ROLES, ACCESS_TOKEN_EXPIRATION_TIME, REFRESH_TOKEN_EXPIRATION_TIME } fr
 
 /**
  * Generates an function which can be used for Authentication of a given class of user (Applicant, Recuiter, etc.)
- * @param {string} findUserFunction - function that takes email as an parameter and returns the user with given email.
+ * @param {string} findUserFunction - function that takes email as an parameter and returns the user document with given email.
  * @param {string} role - role of the user class
- * @returns {Promise<Document>} A function which can be used to authenticate any user of the specified user class
+ * @returns {Promise<Document>} A function which can be used to authenticate a user of the specified user class
  * @example
  * // This return a function to authenticate an Applicant
- * const authenticateApplicant = getAuthenticator( ApplicantService.findApplicant, ROLES.APPLICANT )
+ * const authenticateApplicant = getAuthenticationFunction( ApplicantService.findApplicant, ROLES.APPLICANT )
 */
-const getAuthenticator = (findUserFunction, role) => {
+const getAuthenticationFunction = (findUserFunction, role) => {
     return async (email, password) => {
         if(!email) 
             throw new ApiError(400, "Missing Credentials", { email: "Email is required" });
@@ -49,6 +49,6 @@ const getAuthenticator = (findUserFunction, role) => {
 }
 
 // Function to authenticate an applicant
-export const authenticateApplicant = getAuthenticator(ApplicantService.findApplicant, ROLES.APPLICANT);
+export const authenticateApplicant = getAuthenticationFunction(ApplicantService.findApplicant, ROLES.APPLICANT);
 // Function to authenticate an Recruiter
-export const authenticateRecruiter = getAuthenticator(RecruiterService.findRecruiter, ROLES.RECRUITER);
+export const authenticateRecruiter = getAuthenticationFunction(RecruiterService.findRecruiter, ROLES.RECRUITER);
