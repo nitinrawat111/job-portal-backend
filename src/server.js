@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import { logRequest } from './middlewares/requestLogger.js';
+import { logRequest } from './middlewares/logger.middleware.js';
 import { connectDB } from './db/db.js';
 import { logger } from './utils/logger.js';
 import { ApiResponse } from './utils/ApiResponse.js';

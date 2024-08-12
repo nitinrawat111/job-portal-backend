@@ -1,29 +1,20 @@
 import bcrypt from 'bcrypt';
 import { ApiError } from '../utils/ApiError.js';
 import { PASSWORD_SALT_ROUNDS } from '../constants.js';
-import * as ApplicantService from './applicant.service.js'
-import * as RecruiterService from './recruiter.service.js'
+import ApplicantService from './applicant.service.js'
+import RecruiterService from './recruiter.service.js'
 import { Applicant } from "../models/applicant.model.js";
 import { Recruiter } from "../models/recruiter.model.js";
-import { validatePassword, validatePasswordStrength } from './validation.service.js';
+import ValidationService from './validation.service.js';
 
-/**
- * Generates an function which can be used for Registration of a given class of user (Applicant, Recuiter, etc.)
- * @param {string} UserModel - Model representing the user class
- * @param {string} findUserFunction - function that takes email as an parameter and returns the user document with given email.
- * @returns {Promise<Document>} A function which can be used to register a new user of the specified user class
- * @example
- * // This return a function to authenticate an Applicant
- * const registerApplicant = getRegistrationFunction( Applicant, ApplicantService.findApplicant)
-*/
-const getRegistrationFunction = (UserModel, findUserFunction) => {
-    // This returned function can be used to register a new user in the specified UserModel
-    return async (userDetails) => {
-        // Validate password first. Also validate if password is strong enough
-        validatePassword(userDetails.password);
-        validatePasswordStrength(userDetails.password);
-
-        // Create a new Applicant Document
+class RegistrationService {
+    static async #registerGeneralUser(userDetails, UserService, UserModel) {
+        // Validate password first. 
+        ValidationService.validatePassword(userDetails.password);
+        // Also validate if password is strong enough
+        ValidationService.validatePasswordStrength(userDetails.password);
+        console.log('here');
+        // Create a new User Document
         const newUser = new UserModel(userDetails);
 
         // Adding a mock hash field to allow validation
@@ -33,7 +24,7 @@ const getRegistrationFunction = (UserModel, findUserFunction) => {
         await newUser.validate();
 
         // If given email is already registered
-        if (await findUserFunction(newUser.email))
+        if (await UserService.findByEmail(newUser.email))
             throw new ApiError(409, "Email already registered", { email: "Email already registered" });
 
         // Generating hash from password
@@ -42,11 +33,14 @@ const getRegistrationFunction = (UserModel, findUserFunction) => {
         // Saving new applicant document to DB. Not validating before save as it was already done above.
         return await newUser.save({ validateBeforeSave: false });
     }
+
+    static async registerApplicant(applicantDetails) {
+        return await this.#registerGeneralUser(applicantDetails, ApplicantService, Applicant);
+    }
+
+    static async registerRecruiter(recruiterDetails) {
+        return await this.#registerGeneralUser(recruiterDetails, RecruiterService, Recruiter);
+    }
 }
 
-// Function to register an Applicant
-const registerApplicant = getRegistrationFunction( Applicant, ApplicantService.findApplicant);
-// Function to register an Recruiter
-const registerRecruiter = getRegistrationFunction( Recruiter, RecruiterService.findRecruiter);
-
-export { registerApplicant, registerRecruiter };
+export default RegistrationService;

@@ -11,5 +11,5 @@ export const logRequest = (req, res, next) => {
         cookies: req.cookies
     };
     logger.http(`Incoming Request: ${JSON.stringify(reqDilutedObject, null, 2)}`);
-    next();
+    return next();
 }
