@@ -5,6 +5,7 @@ import * as ApplicantService from './applicant.service.js'
 import * as RecruiterService from './recruiter.service.js'
 import { Applicant } from "../models/applicant.model.js";
 import { Recruiter } from "../models/recruiter.model.js";
+import { validatePassword, validatePasswordStrength } from './validation.service.js';
 
 /**
  * Generates an function which can be used for Registration of a given class of user (Applicant, Recuiter, etc.)
@@ -16,14 +17,19 @@ import { Recruiter } from "../models/recruiter.model.js";
  * const registerApplicant = getRegistrationFunction( Applicant, ApplicantService.findApplicant)
 */
 const getRegistrationFunction = (UserModel, findUserFunction) => {
+    // This returned function can be used to register a new user in the specified UserModel
     return async (userDetails) => {
+        // Validate password first. Also validate if password is strong enough
+        validatePassword(userDetails.password);
+        validatePasswordStrength(userDetails.password);
+
         // Create a new Applicant Document
         const newUser = new UserModel(userDetails);
 
         // Adding a mock hash field to allow validation
         newUser.hash = "x";
 
-        // Validating Applicant details manually before doing anything expensive
+        // Validating Applicant details manually before doing anything expensive. All field in the Schema will be validated here
         await newUser.validate();
 
         // If given email is already registered

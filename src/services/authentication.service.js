@@ -4,6 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import * as ApplicantService from './applicant.service.js';
 import * as RecruiterService from './recruiter.service.js';
 import { ROLES, ACCESS_TOKEN_EXPIRATION_TIME, REFRESH_TOKEN_EXPIRATION_TIME } from "../constants.js";
+import { validateEmail, validatePassword } from './validation.service.js';
 
 /**
  * Generates an function which can be used for Authentication of a given class of user (Applicant, Recuiter, etc.)
@@ -16,11 +17,8 @@ import { ROLES, ACCESS_TOKEN_EXPIRATION_TIME, REFRESH_TOKEN_EXPIRATION_TIME } fr
 */
 const getAuthenticationFunction = (findUserFunction, role) => {
     return async (email, password) => {
-        if(!email) 
-            throw new ApiError(400, "Missing Credentials", { email: "Email is required" });
-        
-        if(!password) 
-            throw new ApiError(400, "Missing Credentials", { password: "Password is required" });
+        validateEmail(email);
+        validatePassword(password);
         
         const foundUser = await findUserFunction(email);
         if (!foundUser)
