@@ -16,9 +16,6 @@ class JWTService {
     }
 
     static verifyAccessToken(token) {
-        if(!token)
-            throw new ApiError(400, "Missing Access Token")
-
         let decoded;
         try {
             decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
@@ -30,9 +27,6 @@ class JWTService {
     }
 
     static verifyRefreshToken(token) {
-        if(!token)
-            throw new ApiError(400, "Missing Refresh Token")
-
         let decoded;
         try {
             decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
