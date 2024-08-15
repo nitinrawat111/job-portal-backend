@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { emailSchemaType, contactNumberSchemaType, linkSchemaType, timestampSchemaType } from "./common.schemaTypes.js";
+import { emailSchemaType, contactNumberSchemaType, linkSchemaType } from "./common.schemaTypes.js";
 import { addressSchema } from "./common.subSchemas.js";
 
 // Education Subschema
@@ -145,9 +145,8 @@ const applicantSchema = new mongoose.Schema({
 	projects: [projectSchema],
 	certifications: [certificationSchema],
 	links: [linkSchema],
-	registrationTimestamp: timestampSchemaType,
 	refreshTokens: [{ type: String }]
-});
+}, { timestamps: true });
 
 // Creating unique Index on email field
 applicantSchema.index({ email: 1 }, { unique: true });

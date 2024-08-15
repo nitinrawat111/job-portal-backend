@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { timestampSchemaType } from "./common.schemaTypes";
 
 // Salary Subschema
 const salarySchema = new mongoose.Schema({
@@ -29,8 +28,7 @@ const jobPostSchema = new mongoose.Schema({
 	showRecruiterInfo: { type: Boolean, required: true },
 	salary: salarySchema,
 	requiredSkills: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Skill' }], // Assuming 'Skill' is the related Mongoose model
-	timestamp: timestampSchemaType
-});
+}, { timestamps: true });
 
 // Create the Mongoose model
 export const JobPost = mongoose.model('JobPost', jobPostSchema);

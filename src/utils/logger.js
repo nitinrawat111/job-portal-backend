@@ -1,24 +1,23 @@
 import winston from 'winston';
 
 // Setting different logging levels based on environment
-let logLevel;
+let consoleLogLevel;
 if (process.env.NODE_ENV == 'production')
-    logLevel = process.env.PRODUCTION_LOG_LEVEL || 'warn';
+    consoleLogLevel = process.env.PRODUCTION_LOG_LEVEL || 'info';
 else if (process.env.NODE_ENV == 'test')
-    logLevel = process.env.TEST_LOG_LEVEL || 'warn';
+    consoleLogLevel = process.env.TEST_LOG_LEVEL || 'warn';
 else if (process.env.NODE_ENV == 'development')
-    logLevel = process.env.DEV_LOG_LEVEL || 'silly';
+    consoleLogLevel = process.env.DEV_LOG_LEVEL || 'silly';
 else
-    logLevel = process.env.DEV_LOG_LEVEL || 'silly';    // If NODE_ENV is not defined
+    consoleLogLevel = process.env.DEV_LOG_LEVEL || 'silly';    // If NODE_ENV is not defined, consider it as Development Environment
 
-// Defining logging format
+// Defining console logging format
 const consoleLogFormat = winston.format.printf(({ level, message, label, timestamp }) => {
     return `${level}: ${message}\n------------------------------------------------------------------------`;
 });
 
 // Activity logger
 export const logger = winston.createLogger({
-    level: logLevel,
     transports: [
         // File transport only for error logs
         new winston.transports.File({
@@ -30,17 +29,19 @@ export const logger = winston.createLogger({
             )
         }),
 
-        // File transports for all logs <= level
+        // File transports for all logs <= info
         new winston.transports.File({
             filename: './logs/activity.log',
+            level: 'http',
             format: winston.format.combine(
                 winston.format.timestamp(),
                 winston.format.json()
             )
         }),
         
-        // Console transports for all logs <= level
+        // Console transports for all logs <= consoleLogLevel
         new winston.transports.Console({
+            level: consoleLogLevel,
             format: winston.format.combine(
                 winston.format.colorize(),
                 winston.format.simple(),

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { addressSchema } from "./common.subSchemas.js";
-import { linkSchemaType, emailSchemaType, contactNumberSchemaType, timestampSchemaType } from "./common.schemaTypes.js";
+import { linkSchemaType, emailSchemaType, contactNumberSchemaType } from "./common.schemaTypes.js";
 
 const companySchema = new mongoose.Schema({
 	name: { type: String, required: true },
@@ -19,9 +19,8 @@ const companySchema = new mongoose.Schema({
 		type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Recruiter' }],
 		required: true,
 		default: undefined
-	},
-	registrationTimestamp: timestampSchemaType
-});
+	}
+}, { timestamps: true });
 
 // Create the Mongoose model
 export const Company = mongoose.model('Company', companySchema);

@@ -1,14 +1,10 @@
 import bcrypt from 'bcrypt';
 import { ApiError } from "../utils/ApiError.js";
-import ApplicantService from './applicant.service.js';
-import RecruiterService from './recruiter.service.js';
-import jwt from 'jsonwebtoken';
 import JWTService from './jwt.service.js';
 import ValidationService from './validation.service.js';
-import { ROLES } from '../constants.js';
 
 class AuthenticationService {
-    static async #authenticateUser(email, password, UserService) {
+    static async authenticateUser(email, password, UserService) {
         ValidationService.validateEmail(email);
         ValidationService.validatePassword(password);
 
@@ -25,8 +21,14 @@ class AuthenticationService {
         return tokens;
     }
 
-    static async #refreshUserAuthentication(incomingRefreshToken, UserService) {
+    static async refreshUserAuthentication(incomingRefreshToken, UserService) {
         const decoded = JWTService.verifyRefreshToken(incomingRefreshToken);
+        
+        // Checking for if the refresh token is used for rightful user role
+        // Removing this will allow one to refresh authentication using tokens for another role (however, there is less than one in billion-billion chance for that)
+        if(decoded.userDetails.role != UserService.role) 
+            throw new ApiError(403, "Forbidden");
+
         const foundUser = await UserService.findById(decoded.userDetails._id, { _id: 1, refreshTokens: 1 });
         if (!foundUser)
             throw new ApiError(401, "Unauthorized: User not found");
@@ -45,37 +47,7 @@ class AuthenticationService {
         return tokens;
     }
 
-    static async logoutUser(refreshToken) {
-        let decoded;
-        try {
-            decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-        } finally {
-            // Decide which service to use based on user role. This will help in deciding which model to use to make changes in DB 
-            const UserService = decoded.userDetails.role == ROLES.APPLICANT ? ApplicantService : RecruiterService;
-            
-            // Remove the refresh token from DB (if it exists)
-            await UserService.Model.updateOne(
-                { _id: decoded.userDetails._id, refreshTokens: refreshToken },
-                { $pull: { refreshTokens: refreshToken } }
-            );
-        }
-    }
-
-    static async authenticateApplicant(email, password) {
-        return await this.#authenticateUser(email, password, ApplicantService);
-    }
-
-    static async authenticateRecruiter(email, password) {
-        return await this.#authenticateUser(email, password, RecruiterService);
-    }
-
-    static async refreshApplicantAuthentication(incomingRefreshToken) {
-        return await this.#refreshUserAuthentication(incomingRefreshToken, ApplicantService);
-    }
-
-    static async refreshRecruiterAuthentication(incomingRefreshToken) {
-        return await this.#refreshUserAuthentication(incomingRefreshToken, RecruiterService);
-    }
+    
 }
 
 export default AuthenticationService;

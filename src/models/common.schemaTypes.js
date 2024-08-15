@@ -41,9 +41,3 @@ export const linkSchemaType = {
         message: "Invalid Link"
     }
 };
-
-export const timestampSchemaType = {
-    type: Date,
-    default: Date.now,
-    required: true
-};

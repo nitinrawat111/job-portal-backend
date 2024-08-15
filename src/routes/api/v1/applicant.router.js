@@ -1,10 +1,10 @@
 import express from 'express';
 import { asyncHandler } from '../../../utils/asyncHandler.js';
-import { registerApplicantController, authenticateApplicantController, refreshApplicantAuthenticationController } from '../../../controllers/applicant.controller.js';
+import ApplicantController from '../../../controllers/applicant.controller.js';
 
 const router = express.Router();
-router.post('/register', asyncHandler(registerApplicantController));
-router.post('/authenticate', asyncHandler(authenticateApplicantController));
-router.post('/authenticate/refresh', asyncHandler(refreshApplicantAuthenticationController));
+router.post('/register', asyncHandler(ApplicantController.register));
+router.post('/authenticate', asyncHandler(ApplicantController.authenticate));
+router.post('/authenticate/refresh', asyncHandler(ApplicantController.refreshAuthentication));
 
 export default router;

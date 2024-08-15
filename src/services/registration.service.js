@@ -1,21 +1,17 @@
 import bcrypt from 'bcrypt';
 import { ApiError } from '../utils/ApiError.js';
 import { PASSWORD_SALT_ROUNDS } from '../constants.js';
-import ApplicantService from './applicant.service.js'
-import RecruiterService from './recruiter.service.js'
-import { Applicant } from "../models/applicant.model.js";
-import { Recruiter } from "../models/recruiter.model.js";
 import ValidationService from './validation.service.js';
 
 class RegistrationService {
-    static async #registerGeneralUser(userDetails, UserService, UserModel) {
+    static async registerUser(newUserDetails, UserService) {
         // Validate password first. 
-        ValidationService.validatePassword(userDetails.password);
+        ValidationService.validatePassword(newUserDetails.password);
         // Also validate if password is strong enough
-        ValidationService.validatePasswordStrength(userDetails.password);
-        console.log('here');
+        ValidationService.validatePasswordStrength(newUserDetails.password);
+
         // Create a new User Document
-        const newUser = new UserModel(userDetails);
+        const newUser = new UserService.Model(newUserDetails);
 
         // Adding a mock hash field to allow validation
         newUser.hash = "x";
@@ -28,18 +24,10 @@ class RegistrationService {
             throw new ApiError(409, "Email already registered", { email: "Email already registered" });
 
         // Generating hash from password
-        newUser.hash = await bcrypt.hash(userDetails.password, PASSWORD_SALT_ROUNDS);
+        newUser.hash = await bcrypt.hash(newUserDetails.password, PASSWORD_SALT_ROUNDS);
 
         // Saving new applicant document to DB. Not validating before save as it was already done above.
-        return await newUser.save({ validateBeforeSave: false });
-    }
-
-    static async registerApplicant(applicantDetails) {
-        return await this.#registerGeneralUser(applicantDetails, ApplicantService, Applicant);
-    }
-
-    static async registerRecruiter(recruiterDetails) {
-        return await this.#registerGeneralUser(recruiterDetails, RecruiterService, Recruiter);
+        await newUser.save({ validateBeforeSave: false });
     }
 }
 
