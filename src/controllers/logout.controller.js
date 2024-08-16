@@ -6,7 +6,7 @@ class LogoutController {
         LogoutService.logout(req.cookies.refreshToken);
         res.clearCookie('accessToken');
         res.clearCookie('refreshToken');
-        res.status(200).json(new ApiResponse(200, "Logged out"));
+        return res.status(200).json(new ApiResponse(200, "Logged out"));
     }
 }
 

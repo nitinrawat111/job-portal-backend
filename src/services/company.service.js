@@ -4,9 +4,9 @@ class CompanyService {
     static Model = Company;
     
     static async register(newCompanyDetails, adminId) {
-        newCompanyDetails.admin = adminId;
-        newCompanyDetails.recruiters = [adminId];
-        const newCompany = new Company(newCompanyDetails);
+        const newCompany = new this.Model(newCompanyDetails);
+        newCompany.admin = adminId;
+        newCompany.recruiters = [adminId];
         await newCompany.save();
     }
 }

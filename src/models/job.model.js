@@ -15,7 +15,7 @@ const salarySchema = new mongoose.Schema({
 	}
 }, { _id: false });
 
-const jobPostSchema = new mongoose.Schema({
+const jobSchema = new mongoose.Schema({
 	companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
 	recruiterId: { type: mongoose.Schema.Types.ObjectId, ref: 'Recruiter', required: true },
 	title: { type: String, required: true },
@@ -31,4 +31,4 @@ const jobPostSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Create the Mongoose model
-export const JobPost = mongoose.model('JobPost', jobPostSchema);
+export const Job = mongoose.model('Job', jobSchema);
