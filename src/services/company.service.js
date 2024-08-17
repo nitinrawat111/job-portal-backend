@@ -1,13 +1,34 @@
+import mongoose from 'mongoose';
 import { Company } from '../models/company.model.js';
+import { ApiError } from '../utils/ApiError.js';
 
 class CompanyService {
     static Model = Company;
+    static safeProjection = {
+        _id: 0,
+        admin: 0,
+        recruiters: 0,
+        createdAt: 0,
+        updatedAt: 0,
+        __v: 0,
+    }
     
     static async register(newCompanyDetails, adminId) {
         const newCompany = new this.Model(newCompanyDetails);
         newCompany.admin = adminId;
         newCompany.recruiters = [adminId];
         await newCompany.save();
+    }
+
+    static async getById(_id) {
+        if(!mongoose.isValidObjectId(_id))
+            throw new ApiError(401, "Invalid id");
+
+        const company = await this.Model.findOne({ _id: _id } , this.safeProjection).lean().exec();
+        if(!company)
+            throw new ApiError(404, "id not found");
+
+        return company;
     }
 }
 
