@@ -21,6 +21,11 @@ class RecruiterController {
         res.cookie('refreshToken', refreshToken, { maxAge: REFRESH_TOKEN_EXPIRATION_TIME });
         return res.status(200).json(new ApiResponse(200, "Successfully Refreshed Authentication"));
     }
+
+    static async getProfile (req, res, next) {
+        const profile = await RecruiterService.getProfile(req.userDetails._id);
+        return res.status(200).json(new ApiResponse(200, "Recruiter profile fetched successfully", { profile: profile }));
+    }
 }
 
 export default RecruiterController;

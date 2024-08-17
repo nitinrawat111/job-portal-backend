@@ -6,6 +6,14 @@ class UserService {
     // To be defined in child classes
     static Model = undefined;
     static role = undefined;
+    static safeProjection = {
+        _id: 0,
+        hash: 0,
+        __v: 0,
+        createdAt: 0,
+        updatedAt: 0,
+        refreshTokens: 0
+    }
 
     static async register(newUserDetails) {
         await RegistrationService.registerUser(newUserDetails, this);

@@ -6,6 +6,6 @@ import { asyncHandler } from '../../../utils/asyncHandler.js';
 import CompanyController from '../../../controllers/company.controller.js';
 
 const router = express.Router();
-router.post('/register', verifyJWT, authorize(ROLES.RECRUITER), asyncHandler(CompanyController.register));
+router.post('/', verifyJWT, authorize(ROLES.RECRUITER), asyncHandler(CompanyController.register));
 
 export default router;

@@ -21,6 +21,11 @@ class ApplicantController {
         res.cookie('refreshToken', refreshToken, { maxAge: REFRESH_TOKEN_EXPIRATION_TIME });
         return res.status(200).json(new ApiResponse(200, "Succesfully Refreshed Authentication"));
     }
+
+    static async getProfile (req, res, next) {
+        const profile = await ApplicantService.getProfile(req.userDetails._id);
+        return res.status(200).json(new ApiResponse(200, "Applicant profile fetched successfully", { profile: profile }));
+    }
 }
 
 export default ApplicantController;

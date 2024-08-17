@@ -46,8 +46,6 @@ class AuthenticationService {
         await UserService.addRefreshTokenAndSave(foundUser, tokens.refreshToken);
         return tokens;
     }
-
-    
 }
 
 export default AuthenticationService;
