@@ -8,7 +8,10 @@ class AuthenticationService {
         ValidationService.validateEmail(email);
         ValidationService.validatePassword(password);
 
-        const foundUser = await UserService.findByEmail(email, { _id: 1, hash: 1, refreshTokens: 1 });
+        const foundUser = await UserService.Model.findOne(
+            { email: email },
+            { _id: 1, hash: 1 }
+        ).lean().exec();
         if (!foundUser)
             throw new ApiError(401, "Not Authorized", { email: "Given email does not exist" });
 
@@ -17,33 +20,47 @@ class AuthenticationService {
             throw new ApiError(401, "Not Authorized", { password: "Wrong password" });
 
         const tokens = JWTService.generateTokens(foundUser._id, UserService.role);
-        await UserService.addRefreshTokenAndSave(foundUser, tokens.refreshToken);
+        await UserService.Model.findByIdAndUpdate(
+            foundUser._id,
+            { $push : { refreshTokens: tokens.refreshToken } }
+        );
         return tokens;
     }
 
     static async refreshUserAuthentication(incomingRefreshToken, UserService) {
         const decoded = JWTService.verifyRefreshToken(incomingRefreshToken);
-        
-        // Checking for if the refresh token is used for rightful user role
-        // Removing this will allow one to refresh authentication using tokens for another role (however, there is less than one in billion-billion chance for that)
-        if(decoded.userDetails.role != UserService.role) 
-            throw new ApiError(403, "Forbidden");
 
-        const foundUser = await UserService.findById(decoded.userDetails._id, { _id: 1, refreshTokens: 1 });
+        const foundUser = await UserService.Model.findOne(
+            { _id: decoded.userDetails._id },
+            { _id: 1, refreshTokens: 1 }
+        ).lean().exec();
         if (!foundUser)
             throw new ApiError(401, "Unauthorized: User not found");
 
+        // refreshTokens Array will never be undefined
+        // Mongoose gives arrays the default value of []
+        // So, it's guaranteed to be in the DB (unless Schema was changed!)
         const index = foundUser.refreshTokens.indexOf(incomingRefreshToken);
         if (index == -1) {
-            // Refresh Token Reuse detected. Invalidating all refresh tokens to logout of all sessions
-            await UserService.clearRefreshTokensAndSave(foundUser);
+            // Refresh Token Reuse detected
+            //Invalidating all refresh tokens to logout of all sessions
+            await UserService.Model.findByIdAndUpdate(
+                decoded.userDetails._id,
+                {
+                    $set : { refreshTokens: [] }
+                }
+            );
             throw new ApiError(401, "Unauthorized: Refresh Token reuse detected");
         }
 
-        // Remove incomingRefreshToken
-        foundUser.refreshTokens.splice(index, 1);
         const tokens = JWTService.generateTokens(foundUser._id, UserService.role);
-        await UserService.addRefreshTokenAndSave(foundUser, tokens.refreshToken);
+        await UserService.Model.findByIdAndUpdate(
+            decoded.userDetails._id,
+            {
+                $pull: { refreshToken: incomingRefreshToken },
+                $push: { refreshTokens: tokens.refreshToken }
+            }
+        );
         return tokens;
     }
 }

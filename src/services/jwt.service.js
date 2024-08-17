@@ -20,7 +20,7 @@ class JWTService {
         try {
             decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
         } catch (err) {
-            throw new ApiError(401, "Unauthorized: Invalid Access Token");
+            throw new ApiError(401, "Unauthorized: Missing or Invalid Access Token");
         }
 
         return decoded;
@@ -31,7 +31,7 @@ class JWTService {
         try {
             decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
         } catch (err) {
-            throw new ApiError(401, "Unauthorized: Invalid Refresh Token");
+            throw new ApiError(401, "Unauthorized: Missing or Invalid Refresh Token");
         }
 
         return decoded;

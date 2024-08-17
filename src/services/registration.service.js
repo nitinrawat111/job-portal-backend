@@ -20,7 +20,11 @@ class RegistrationService {
         await newUser.validate();
 
         // If given email is already registered
-        if (await UserService.findByEmail(newUser.email))
+        const existingUser = await UserService.findOne( 
+            { email : newUser.email },
+            { _id: 1 }
+        ).lean().exec();
+        if (existingUser)
             throw new ApiError(409, "Email already registered", { email: "Email already registered" });
 
         // Generating hash from password

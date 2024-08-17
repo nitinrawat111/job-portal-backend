@@ -12,7 +12,7 @@ class RecruiterService extends UserService {
                 _id: _id
             },
             this.safeProjection
-        ).exec();
+        ).lean().exec();
     }
 }
 

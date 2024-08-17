@@ -8,8 +8,8 @@ class LogoutService {
         let decoded = undefined;
         try {
             // Verify the refreshToken. 
-            // Ignoring expiration as we want payload to remove the expired token from DB. 
-            // If we don't ignore it and error will be thrown for expired tokens
+            // Ignoring expiration as we need the payload (to remove the expired token from DB). 
+            // If we don't ignore it, an error will be thrown for expired tokens
             decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, { ignoreExpiration: true });
         } catch (err) {
             // If token was tampered with. We can't do anything :)
@@ -24,8 +24,10 @@ class LogoutService {
         const UserService = decoded.userDetails.role == ROLES.APPLICANT ? ApplicantService : RecruiterService;
 
         // Remove the refresh token from DB (if it exists)
+        // We don't need to check for existence of refreshToken in the DB
+        // The below updateOne will remove the refreshToken only if it exists. Otherwise, no change is made
         await UserService.Model.updateOne(
-            { _id: decoded.userDetails._id, refreshTokens: refreshToken },
+            { _id: decoded.userDetails._id },
             { $pull: { refreshTokens: refreshToken } }
         );
     }
