@@ -20,7 +20,7 @@ class RegistrationService {
         await newUser.validate();
 
         // If given email is already registered
-        const existingUser = await UserService.findOne( 
+        const existingUser = await UserService.Model.findOne( 
             { email : newUser.email },
             { _id: 1 }
         ).lean().exec();

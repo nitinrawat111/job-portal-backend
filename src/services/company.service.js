@@ -22,7 +22,7 @@ class CompanyService {
 
     static async getById(_id) {
         if(!mongoose.isValidObjectId(_id))
-            throw new ApiError(401, "Invalid id");
+            throw new ApiError(400, "Invalid id");
 
         const company = await this.Model.findOne({ _id: _id } , this.safeProjection).lean().exec();
         if(!company)

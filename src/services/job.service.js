@@ -7,23 +7,26 @@ class JobService {
     
     static async post(newJobDetails, recruiterId) {
         if(!newJobDetails.companyId)
-            throw new ApiError(401, "companyId is required", { companyId: "companyId is required" });
+            throw new ApiError(400, "companyId is required", { companyId: "companyId is required" });
 
         const matchedCompany = await CompanyService.Model.findOne(
             {
                 _id: newJobDetails.companyId,
-                recruiters: recruiterId
             },
             {
-                _id: 1 // Retrieving only _id. Transmittin entire document will be costly
+                _id: 1,
+                recruiters: { $elemMatch : { $eq: recruiterId } }
             }
-        ).exec();
+        ).lean().exec();
 
         if(!matchedCompany)
-            throw new ApiError(401, "Either the given companyId does not exist or you are not authorised to Post Jobs for this company", { companyId: "Invalid or Forbidden" });
+            throw new ApiError(404, "Given companyId not found", { companyId: "Given companyId not found" });
 
+        if(!matchedCompany.recruiters)
+            throw new ApiError(403, "Forbidden: You are not authorized to post jobs for this company");
+
+        newJobDetails.recruiterId = recruiterId;
         const newJob = new this.Model(newJobDetails);
-        newJob.recruiterId = recruiterId;
         await newJob.save();
     }
 }
