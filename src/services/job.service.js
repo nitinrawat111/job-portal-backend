@@ -15,13 +15,17 @@ class JobService {
             },
             {
                 _id: 1,
-                recruiters: { $elemMatch : { $eq: recruiterId } }
+                // Instead of including entire recruiters array, including provided recruiterId (it it exists in array)
+                // This 'recruiters' field will only be included in the result if it contains the given recruiterId
+                recruiters: { $elemMatch : { $eq: recruiterId } }   
             }
         ).lean().exec();
 
         if(!matchedCompany)
             throw new ApiError(404, "Given companyId not found", { companyId: "Given companyId not found" });
 
+        // If recruiters field in not in returned document
+        // It means that the recuiters array of the given company did not contain the provided recruiterId
         if(!matchedCompany.recruiters)
             throw new ApiError(403, "Forbidden: You are not authorized to post jobs for this company");
 
