@@ -7,5 +7,6 @@ import JobController from '../../../controllers/job.controller.js';
 
 const router = express.Router();
 router.post('/', verifyJWT, authorize(ROLES.RECRUITER), asyncHandler(JobController.post));
+router.get('/:id', verifyJWT, asyncHandler(JobController.getById));
 
 export default router;

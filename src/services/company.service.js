@@ -5,7 +5,6 @@ import { ApiError } from '../utils/ApiError.js';
 class CompanyService {
     static Model = Company;
     static safeProjection = {
-        _id: 0,
         admin: 0,
         recruiters: 0,
         createdAt: 0,

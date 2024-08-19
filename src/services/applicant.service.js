@@ -30,7 +30,8 @@ class ApplicantService extends UserService {
         return (await this.Model.aggregate([
             {
                 $match: {
-                    _id: mongoose.Types.ObjectId.createFromHexString(_id)   // Default _id is created from hex string in MongoDB. Also mongoose.Types.ObjectId is deprecated
+                    // Default _id is created from hex string in MongoDB. Also mongoose.Types.ObjectId is deprecated
+                    _id: mongoose.Types.ObjectId.createFromHexString(_id)
                 }
             },
             {
@@ -49,7 +50,7 @@ class ApplicantService extends UserService {
             {
                 $project: this.safeProjection
             }
-        ]).exec())[0];   // [0] because aggregation returns an array. We need the first document
+        ]).exec())[0];  // [0] because aggregation returns an array. We need the first and only document
     }
 }
 
