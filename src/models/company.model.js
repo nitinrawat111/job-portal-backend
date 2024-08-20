@@ -3,11 +3,11 @@ import { addressSchema } from "./common.subSchemas.js";
 import { linkSchemaType, emailSchemaType, contactNumberSchemaType } from "./common.schemaTypes.js";
 
 const companySchema = new mongoose.Schema({
-	name: { type: String, required: [true, "Name is required"] },
+	name: { type: String, required: [true, "Name is required"], trim: true },
 	foundationYear: { type: Number },
 	hqAddress: addressSchema,
 	website: linkSchemaType,
-	description: { type: String },
+	description: { type: String, trim: true },
 	emails: [emailSchemaType],
 	contactNumbers: [contactNumberSchemaType],
 	admin: {

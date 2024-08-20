@@ -5,9 +5,9 @@
 import mongoose from "mongoose";
 
 export const addressSchema = new mongoose.Schema({
-	blockOrStreet: { type: String },
-	city: { type: String },
-	state: { type: String },
-	country: { type: String },
-	zip: { type: String }
+	blockOrStreet: { type: String, trim: true },
+	city: { type: String, trim: true },
+	state: { type: String, trim: true },
+	country: { type: String, trim: true },
+	zip: { type: String, trim: true }
 }, { _id: false });

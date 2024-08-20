@@ -14,6 +14,7 @@ import validator from "validator";
 
 export const emailSchemaType = {
 	type: String,
+	trim: true,
 	validate: {
 		validator: function(email) {
 			return validator.isEmail(email);
@@ -24,6 +25,7 @@ export const emailSchemaType = {
 
 export const contactNumberSchemaType = {
 	type: String,
+	trim: true,
 	validate: {
 		validator: function(contactNumber) {
 			return validator.isMobilePhone(contactNumber);
@@ -34,6 +36,7 @@ export const contactNumberSchemaType = {
 
 export const linkSchemaType = { 
     type: String,
+	trim: true,
     validate: {
         validator: function(link) {
             return validator.isURL(link);

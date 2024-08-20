@@ -13,7 +13,7 @@ class ApplicationService {
             throw new ApiError(400, "Invalid job id");
 
         // Checking if job exists or not
-        const job = await JobService.Model.findOne( { _id: jobId }, { _id: 1 });
+        const job = await JobService.Model.findOne( { _id: jobId }, { _id: 1 }).lean().exec();
         if(!job)
             throw new ApiError(404, 'Job id not found');
 
@@ -23,12 +23,12 @@ class ApplicationService {
         });
         
         try {
-            // We have a compound index on [ jobId, applicantId]. So duplicate applications will be throw an error
             await newApplication.save();
         } catch(err) {
             if(err.code != 11000) // 11000 is the error code for Duplicate key error
-                throw err;
-
+            throw err;
+            
+            // We have a unique compound index on [ jobId, applicantId]. So duplicate applications will be throw an error
             // If the combination of current [jobId, applicantId] already exists, it means user has already applied to the job before
             throw new ApiError(409, 'Already applied');
         }
