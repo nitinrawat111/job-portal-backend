@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { Company } from '../models/company.model.js';
 import { ApiError } from '../utils/ApiError.js';
+import SanitizationService from './sanitization.service.js';
 
 class CompanyService {
     static Model = Company;
@@ -13,6 +14,9 @@ class CompanyService {
     }
     
     static async register(newCompanyDetails, adminId) {
+        // Sanitize sensitive feilds
+        // 'admin' and 'recruiter' fields are re-set below. So, no need to sanitize them
+        SanitizationService.getSanitizer('_id', 'createdAt', 'updatedAt', '__v')(newJobDetails);
         const newCompany = new this.Model(newCompanyDetails);
         newCompany.admin = adminId;
         newCompany.recruiters = [adminId];

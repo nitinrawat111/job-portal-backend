@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Job } from "../models/job.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import CompanyService from "./company.service.js";
+import SanitizationService from "./sanitization.service.js";
 
 class JobService {
     static Model = Job;
@@ -14,6 +15,10 @@ class JobService {
     }
 
     static async post(newJobDetails, recruiterId) {
+        // Sanitize sensitive fields
+        // 'recruiterId' field is set below. No need to sanitize it
+        SanitizationService.getSanitizer('_id', 'createdAt', 'updatedAt', '__v')(newJobDetails);
+
         if (!newJobDetails.companyId)
             throw new ApiError(400, "companyId is required", { companyId: "companyId is required" });
 
@@ -37,8 +42,8 @@ class JobService {
         if (!matchedCompany.recruiters)
             throw new ApiError(403, "Forbidden: You are not authorized to post jobs for this company");
 
-        newJobDetails.recruiterId = recruiterId;
         const newJob = new this.Model(newJobDetails);
+        newJob.recruiterId = recruiterId;
         await newJob.save();
     }
 
@@ -74,6 +79,19 @@ class JobService {
             },
             {
                 $unwind: '$recruiter'
+            },
+            {
+                $lookup: {
+                    from: 'skills',
+                    localField: 'requiredSkills',
+                    foreignField: '_id',
+                    as: 'requiredSkills'
+                }
+            },
+            {
+                $addFields: {
+                    requiredSkills: '$requiredSkills.name'
+                }
             },
             {
                 $project: {

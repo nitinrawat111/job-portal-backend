@@ -1,10 +1,14 @@
 import { Skill } from "../models/skill.model.js";
 import { ApiError } from "../utils/ApiError.js";
+import SanitizationService from "./sanitization.service.js";
 
 class SkillService {
     static Model = Skill;
 
     static async add(skillDetails) {
+        // Sanitize _id field
+        SanitizationService.getSanitizer('_id')(skillDetails);
+        
         const newSkill = new this.Model(skillDetails);
         try {
             await newSkill.save();
