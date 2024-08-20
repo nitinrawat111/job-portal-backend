@@ -3,7 +3,7 @@ import { addressSchema } from "./common.subSchemas.js";
 import { linkSchemaType, emailSchemaType, contactNumberSchemaType } from "./common.schemaTypes.js";
 
 const companySchema = new mongoose.Schema({
-	name: { type: String, required: true },
+	name: { type: String, required: [true, "Name is required"] },
 	foundationYear: { type: Number },
 	hqAddress: addressSchema,
 	website: linkSchemaType,
@@ -13,11 +13,11 @@ const companySchema = new mongoose.Schema({
 	admin: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'Recruiter',
-		required: true
+		required: [ true, 'Admin field is required' ]
 	},
 	recruiters: {
 		type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Recruiter' }],
-		required: true,
+		required: [true, 'Recruiters field is required'],
 		default: undefined
 	}
 }, { timestamps: true });

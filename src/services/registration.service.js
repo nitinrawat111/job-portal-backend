@@ -4,7 +4,7 @@ import { PASSWORD_SALT_ROUNDS } from '../constants.js';
 import ValidationService from './validation.service.js';
 
 class RegistrationService {
-    static async registerUser(newUserDetails, UserService) {
+    static async register(newUserDetails, UserService) {
         // Validate password first. 
         ValidationService.validatePassword(newUserDetails.password);
         // Also validate if password is strong enough

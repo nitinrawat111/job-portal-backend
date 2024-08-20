@@ -4,7 +4,7 @@ import JWTService from './jwt.service.js';
 import ValidationService from './validation.service.js';
 
 class AuthenticationService {
-    static async authenticateUser(email, password, UserService) {
+    static async authenticate(email, password, UserService) {
         ValidationService.validateEmail(email);
         ValidationService.validatePassword(password);
 
@@ -27,7 +27,7 @@ class AuthenticationService {
         return tokens;
     }
 
-    static async refreshUserAuthentication(incomingRefreshToken, UserService) {
+    static async refreshAuthentication(incomingRefreshToken, UserService) {
         const decoded = JWTService.verifyRefreshToken(incomingRefreshToken);
 
         const foundUser = await UserService.Model.findOne(

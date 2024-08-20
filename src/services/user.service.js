@@ -16,15 +16,15 @@ class UserService {
     }
 
     static async register(newUserDetails) {
-        await RegistrationService.registerUser(newUserDetails, this);
+        await RegistrationService.register(newUserDetails, this);
     }
 
     static async authenticate(email, password) {
-        return await AuthenticationService.authenticateUser(email, password, this);
+        return await AuthenticationService.authenticate(email, password, this);
     }
 
     static async refreshAuthentication(incomingRefreshToken) {
-        return await AuthenticationService.refreshUserAuthentication(incomingRefreshToken, this);
+        return await AuthenticationService.refreshAuthentication(incomingRefreshToken, this);
     }
 }
 

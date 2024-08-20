@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 import { contactNumberSchemaType, emailSchemaType } from "./common.schemaTypes.js";
 
 const recruiterSchema = new mongoose.Schema({
-    email: { ...emailSchemaType, required: true},
-    hash: { type: String, required: true },
-    name: { type: String, required: true },
+    email: { ...emailSchemaType, required: [true, 'Email is required'] },
+    hash: { type: String, required: [true, 'Hash is requried'] },
+    name: { type: String, required: [true, 'Name is required'] },
     contactNumbers: [contactNumberSchemaType],
     refreshTokens: [{ type: String }]
 }, { timestamps: true });

@@ -133,7 +133,7 @@ const linkSchema = new mongoose.Schema({
 // Main Applicant Schema
 const applicantSchema = new mongoose.Schema({
 	email: { ...emailSchemaType, required: [true, "Email is required"] },
-	hash: { type: String, required: [true, "Server Error: Hash is required"] },
+	hash: { type: String, required: [true, "Hash is required"] },
 	name: { type: String, required: [true, "Name is required"] },
 	contactNumbers: [contactNumberSchemaType],
 	address: addressSchema,

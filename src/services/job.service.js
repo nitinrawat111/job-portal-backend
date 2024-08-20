@@ -44,7 +44,7 @@ class JobService {
 
     static async getById(_id) {
         if (!mongoose.isValidObjectId(_id))
-            throw new ApiError(400, "Invalid id");
+            throw new ApiError(400, "Invalid job id");
 
         const job = (await this.Model.aggregate([
             {
@@ -94,7 +94,7 @@ class JobService {
         ]).exec())[0];  // [0] because aggregation returns an array. We need the first and only document
 
         if (!job)
-            throw new ApiError(404, "id not found");
+            throw new ApiError(404, "Job id not found");
 
         if(!job.showRecruiterInfo) {
             job.recruiter = undefined;
