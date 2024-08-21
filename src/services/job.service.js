@@ -101,6 +101,8 @@ class JobService {
                     description: 1,
                     showRecruiterInfo: 1,
                     salary: 1,
+                    minExperience: 1,
+                    maxExperience: 1,
                     requiredSkills: 1,
                     'company._id': 1,
                     'company.name': 1,

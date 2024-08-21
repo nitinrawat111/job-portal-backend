@@ -1,16 +1,32 @@
 import mongoose from "mongoose";
 
-// Salary Subschema
-const salarySchema = new mongoose.Schema({
-	min: { type: Number, required: true },
+const minMaxSchema = new mongoose.Schema({
+	min: { 
+		type: Number,
+		required: true,
+		validate: {
+			validator: function(min) {
+				if(!this.max) {
+					this.min = undefined;
+				}
+
+				return true;
+			}
+		}
+	},
 	max: { 
 		type: Number, 
 		required: true,
 		validate: {
-			validator: function(maxSalary) {
-				return maxSalary >= this.minSalary;
+			validator: function(max) {
+				if(!this.min) {
+					this.max = undefined;
+					return true;
+				}
+
+				return max >= this.min;
 			},
-			message: "Max Salary cannot be less than Min Salary"
+			message: "Max cannot be less than Min"
 		}
 	}
 }, { _id: false });
@@ -29,7 +45,8 @@ const jobSchema = new mongoose.Schema({
 	},
 	description: { type: String, trim: true },
 	showRecruiterInfo: { type: Boolean, required: [true, 'showRecruiterInfo is required'] },
-	salary: salarySchema,
+	salary: minMaxSchema,
+	experience: minMaxSchema,
 	requiredSkills: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Skill' }], // Assuming 'Skill' is the related Mongoose model
 }, { timestamps: true });
 

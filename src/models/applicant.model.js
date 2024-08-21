@@ -9,6 +9,9 @@ const educationSchema = new mongoose.Schema({
 	startYear: { type: Number, required: [true, "Start Year is required"] },
 	endYear: {
 		type: Number,
+		required: function() {
+			return !this.isOngoing;
+		},
 		validate: {
 			validator: function (endYear) {
 				if (this.isOngoing) {
@@ -23,6 +26,9 @@ const educationSchema = new mongoose.Schema({
 	},
 	expectedEndYear: {
 		type: Number,
+		required: function() {
+			return this.isOngoing;
+		},
 		validate: {
 			validator: function (expectedEndYear) {
 				if (!this.isOngoing) {
@@ -36,28 +42,30 @@ const educationSchema = new mongoose.Schema({
 		}
 	},
 	isOngoing: { type: Boolean, required: [true, "isOngoing is required"] },
-	obtainedGPA: { 
-		type: Number,
-		validate: {
-			validator: function(obtainedGPA) {
-				if(!this.maxGPA) {
-					this.obtainedGPA = undefined;
+	GPA: {
+		obtained: {
+			type: Number,
+			validate: {
+				validator: function (obtained) {
+					if (!this.max) {
+						this.obtained = undefined;
+						return true;
+					}
+
+					return obtained <= this.max;
+				},
+				message: "Obtained GPA cannot be greater than Max GPA"
+			}
+		},
+		max: {
+			type: Number,
+			validate: {
+				validator: function (max) {
+					if (!this.obtained) {
+						this.obtained = undefined;
+					}
 					return true;
 				}
-
-				return obtainedGPA <= this.maxGPA;
-			},
-			message: "Obtained GPA cannot be greater than Max GPA"
-		}
-	},
-	maxGPA: { 
-		type: Number,
-		validate: {
-			validator: function(maxGPA) {
-				if(!this.obtainedGPA) {
-					this.obtainedGPA = undefined;
-				}
-				return true;
 			}
 		}
 	}
@@ -69,11 +77,14 @@ const experienceSchema = new mongoose.Schema({
 	organization: { type: String, required: [[true, "Organization is required"]] },
 	location: { type: String },
 	startDate: { type: Date, required: [true, "Start Date is required"] },
-	endDate: { 
+	endDate: {
 		type: Date,
+		required: function() {
+			return !this.isOngoing;
+		},
 		validate: {
-			validator: function(endDate) {
-				if(this.isOngoing) {
+			validator: function (endDate) {
+				if (this.isOngoing) {
 					this.endDate = undefined;
 					return true;
 				}
@@ -98,11 +109,11 @@ const projectSchema = new mongoose.Schema({
 const certificationSchema = new mongoose.Schema({
 	name: { type: String, required: [true, "Name is required"] },
 	issuedBy: { type: String },
-	issueDate: { 
+	issueDate: {
 		type: Date,
 		validate: {
-			validator: function(issueDate) {
-				if(!this.expiryDate) {
+			validator: function (issueDate) {
+				if (!this.expiryDate) {
 					return true;
 				}
 
@@ -111,11 +122,11 @@ const certificationSchema = new mongoose.Schema({
 			message: "Expiry Date cannot be before Issue Date"
 		}
 	},
-	expiryDate: { 
+	expiryDate: {
 		type: Date,
 		validate: {
-			validator: function(expiryDate) {
-				if(!this.issueDate) {
+			validator: function (expiryDate) {
+				if (!this.issueDate) {
 					this.expiryDate = undefined;
 				}
 				return true;
