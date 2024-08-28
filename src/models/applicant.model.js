@@ -152,7 +152,7 @@ const applicantSchema = new mongoose.Schema({
 	bio: { type: String, trim: true },
 	educations: [educationSchema],
 	experiences: [experienceSchema],
-	skills: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Skill' }],
+	skills: [String],
 	projects: [projectSchema],
 	certifications: [certificationSchema],
 	links: [linkSchema],

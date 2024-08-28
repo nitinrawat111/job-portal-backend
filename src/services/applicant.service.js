@@ -1,7 +1,6 @@
 import { Applicant } from '../models/applicant.model.js';
 import { ROLES } from '../constants.js';
 import UserService from './user.service.js';
-import { Skill } from '../models/skill.model.js';
 import mongoose from 'mongoose'
 
 
@@ -32,19 +31,6 @@ class ApplicantService extends UserService {
                 $match: {
                     // Default _id is created from hex string in MongoDB. Also mongoose.Types.ObjectId is deprecated
                     _id: mongoose.Types.ObjectId.createFromHexString(_id)
-                }
-            },
-            {
-                $lookup: {
-                    from: 'skills',
-                    localField: 'skills',
-                    foreignField: '_id',
-                    as: 'skills'
-                }
-            },
-            {
-                $addFields: {
-                    skills: '$skills.name'
                 }
             },
             {

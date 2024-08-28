@@ -47,7 +47,7 @@ const jobSchema = new mongoose.Schema({
 	showRecruiterInfo: { type: Boolean, required: [true, 'showRecruiterInfo is required'] },
 	salary: minMaxSchema,
 	experience: minMaxSchema,
-	requiredSkills: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Skill' }], // Assuming 'Skill' is the related Mongoose model
+	requiredSkills: [String],
 }, { timestamps: true });
 
 // Create the Mongoose model

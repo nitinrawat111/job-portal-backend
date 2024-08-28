@@ -81,19 +81,6 @@ class JobService {
                 $unwind: '$recruiter'
             },
             {
-                $lookup: {
-                    from: 'skills',
-                    localField: 'requiredSkills',
-                    foreignField: '_id',
-                    as: 'requiredSkills'
-                }
-            },
-            {
-                $addFields: {
-                    requiredSkills: '$requiredSkills.name'
-                }
-            },
-            {
                 $project: {
                     _id: 1,
                     title: 1,
@@ -122,6 +109,10 @@ class JobService {
         }
 
         return job;
+    }
+
+    static async getJobs(applicantId, queryParams) {
+        
     }
 }
 
