@@ -11,7 +11,8 @@ const applicationSchema = new mongoose.Schema({
 	}
 }, { timestamps: true });
 
-applicationSchema.index({ jobId: 1, applicantId: 1 }, { unique: true });
+applicationSchema.index({ applicantId: 1, jobId: 1 }, { unique: true });
+applicationSchema.index({ jobId: 1 });
 
 // Create the Mongoose model
 export const Application = mongoose.model('Application', applicationSchema);

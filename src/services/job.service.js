@@ -12,7 +12,78 @@ class JobService {
         createdAt: 0,
         updatedAt: 0,
         __v: 0,
-    }
+    };
+
+    static companyAndRecruiterLookupStages = [
+        {
+            $lookup: {
+                from: 'companies',
+                let: { currCompanyId: "$companyId" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $eq: ['$_id', '$$currCompanyId']
+                            }
+                        }
+                    },
+                    { $limit: 1 },
+                    {
+                        $project: {
+                            _id: 1,
+                            name: 1
+                        }
+                    }
+                ],
+                as: 'company'
+            }
+        },
+        {
+            $lookup: {
+                from: 'recruiters',
+                let: { currRecruiterId: '$recruiterId' },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $eq: ['$_id', '$$currRecruiterId']
+                            }
+                        },
+                    },
+                    { $limit: 1 },
+                    {
+                        $project: {
+                            _id: 1,
+                            name: 1
+                        }
+                    }
+                ],
+                as: 'recruiter'
+            }
+        },
+        {
+            $project: {
+                _id: 1,
+                title: 1,
+                locations: 1,
+                description: 1,
+                showRecruiterInfo: 1,
+                salary: 1,
+                minExperience: 1,
+                maxExperience: 1,
+                requiredSkills: 1,
+                company: { $first: '$company' },
+                recruiter: {
+                    $cond: [
+                        { $eq: ['$showRecruiterInfo', true] },
+                        { $first: '$recruiter' },
+                        '$$REMOVE'
+                    ]
+                },
+                createdAt: 1,
+            }
+        }
+    ];
 
     static async post(newJobDetails, recruiterId) {
         // Sanitize sensitive fields
@@ -58,61 +129,131 @@ class JobService {
                     _id: mongoose.Types.ObjectId.createFromHexString(_id)
                 }
             },
-            {
-                $lookup: {
-                    from: 'companies',
-                    localField: 'companyId',
-                    foreignField: '_id',
-                    as: 'company'
-                }
-            },
-            {
-                $lookup: {
-                    from: 'recruiters',
-                    localField: 'recruiterId',
-                    foreignField: '_id',
-                    as: 'recruiter'
-                }
-            },
-            {
-                $unwind: '$company'
-            },
-            {
-                $unwind: '$recruiter'
-            },
-            {
-                $project: {
-                    _id: 1,
-                    title: 1,
-                    locations: 1,
-                    description: 1,
-                    showRecruiterInfo: 1,
-                    salary: 1,
-                    minExperience: 1,
-                    maxExperience: 1,
-                    requiredSkills: 1,
-                    'company._id': 1,
-                    'company.name': 1,
-                    'recruiter._id': 1,
-                    'recruiter.name': 1,
-                    createdAt: 1,
-                }
-            }
+            ...this.companyAndRecruiterLookupStages
         ]).exec())[0];  // [0] because aggregation returns an array. We need the first and only document
 
         if (!job)
             throw new ApiError(404, "Job id not found");
 
-        if(!job.showRecruiterInfo) {
-            job.recruiter = undefined;
-            job.showRecruiterInfo = undefined;
-        }
-
         return job;
     }
 
     static async getJobs(applicantId, queryParams) {
-        
+        const pipeline = Job.aggregate();
+
+        const searchQueryPresent = queryParams.q || queryParams.skill || queryParams.location;
+        if (searchQueryPresent) {
+            const searchStage = {
+                index: "jobSearchIndex",
+                compound: {
+                    filter: [],
+                    must: [],
+                    should: []
+                }
+            };
+
+            if (queryParams.q) {
+                searchStage.compound.must.push({
+                    text: {
+                        query: queryParams.q,
+                        path: ['title', 'description', 'requiredSkills', 'locations'],
+                        fuzzy: {}
+                    }
+                });
+            }
+
+            if (queryParams.skill) {
+                searchStage.compound.should.push({
+                    text: {
+                        query: queryParams.skill,
+                        path: 'requiredSkills',
+                        fuzzy: {}
+                    }
+                });
+            }
+
+            if (queryParams.location) {
+                searchStage.compound.filter.push({
+                    text: {
+                        query: queryParams.location,
+                        path: 'locations',
+                        fuzzy: {}
+                    }
+                });
+            }
+
+            if (queryParams.sortBy === 'latest') {
+                searchStage.sort = { _id: -1 };
+            } else {
+                searchStage.sort = {
+                    score: { $meta: "searchScore" },
+                    _id: -1
+                };
+            }
+
+            if(queryParams.lastPaginationToken) {
+                searchStage.searchAfter = queryParams.lastPaginationToken;
+            }
+            
+            pipeline.append({ $search: searchStage });
+        }
+
+        const matchStage = {};
+        if (queryParams.minExperience) {
+            matchStage["experience.min"] = { $gte: queryParams.minExperience };
+        }
+        if (queryParams.maxExperience) {
+            matchStage["experience.max"] = { $lte: queryParams.maxExperience };
+        }
+        if (queryParams.minSalary) {
+            matchStage["salary.min"] = { $gte: queryParams.minSalary };
+        }
+        if (queryParams.maxSalary) {
+            matchStage["salary.max"] = { $lte: queryParams.maxSalary };
+        }
+        pipeline.append({ $match: matchStage });
+
+        let paginationToken;
+        if (!searchQueryPresent) {
+            if(queryParams.lastPaginationToken) {
+                pipeline.append({ 
+                    $match: { 
+                        _id: { $lt: mongoose.Types.ObjectId.createFromHexString(queryParams.lastPaginationToken) }
+                    } 
+                });
+            }
+            pipeline.append({ $sort: { _id: -1 } });
+            paginationToken = '$_id';
+        } else {
+            paginationToken = { $meta: "searchSequenceToken" };
+        }
+
+        const notAppliedJobsLookupStage = {
+            from: "applications",
+            let: { currJobId: "$_id" },
+            pipeline: [
+                {
+                    $match: {
+                        applicantId: mongoose.Types.ObjectId.createFromHexString(applicantId),
+                        $expr: {
+                            $eq: ['$jobId', '$$currJobId']
+                        }
+                    }
+                },
+                { $limit: 1 },
+                { $project: { _id: 1 } }
+            ],
+            as: "applications"
+        };
+        pipeline.append([
+            { $lookup: notAppliedJobsLookupStage },
+            { $match: { applications: [] } },
+            { $limit: 10 },
+            ...this.companyAndRecruiterLookupStages,
+            { $addFields: { paginationToken: paginationToken } }
+        ]);
+
+        return await pipeline.exec();
     }
 }
 

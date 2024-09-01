@@ -17,6 +17,11 @@ class JobController {
         await ApplicationService.submitApplication(req.params.id, req.userDetails._id);
         return res.status(200).json(new ApiResponse(200, 'Applied successfully'));
     }
+
+    static async getJobs(req, res, next) {
+        const jobs = await JobService.getJobs(req.userDetails._id, req.query);
+        return res.status(200).json(new ApiResponse(200, "Jobs fetched successfully", { jobs: jobs }));
+    }
 }
 
 export default JobController;

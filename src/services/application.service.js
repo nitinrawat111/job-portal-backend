@@ -18,8 +18,8 @@ class ApplicationService {
             throw new ApiError(404, 'Job id not found');
 
         const newApplication = new this.Model({
-            jobId: jobId,
-            applicantId: applicantId
+            applicantId: applicantId,
+            jobId: jobId
         });
         
         try {
@@ -28,7 +28,7 @@ class ApplicationService {
             if(err.code != 11000) // 11000 is the error code for Duplicate key error
             throw err;
             
-            // We have a unique compound index on [ jobId, applicantId]. So duplicate applications will be throw an error
+            // We have a unique compound index on [ applicantId, jobId ]. So duplicate applications will be throw an error
             // If the combination of current [jobId, applicantId] already exists, it means user has already applied to the job before
             throw new ApiError(409, 'Already applied');
         }

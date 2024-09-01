@@ -9,4 +9,7 @@ const recruiterSchema = new mongoose.Schema({
     refreshTokens: [{ type: String }]
 }, { timestamps: true });
 
+// Creating unique Index on email field
+recruiterSchema.index({ email: 1 }, { unique: true });
+
 export const Recruiter = mongoose.model('Recruiter', recruiterSchema);
