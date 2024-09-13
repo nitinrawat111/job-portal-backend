@@ -14,6 +14,10 @@ class UserService {
         updatedAt: 0,
         __v: 0
     }
+    
+    static async getProfile(_id) {
+        return await this.Model.findOne({ _id: _id }, this.safeProjection).lean().exec();
+    }
 
     static async register(newUserDetails) {
         await RegistrationService.register(newUserDetails, this);

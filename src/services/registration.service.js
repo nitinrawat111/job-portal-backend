@@ -6,8 +6,8 @@ import SanitizationService from './sanitization.service.js';
 
 class RegistrationService {
     static async register(newUserDetails, UserService) {
-        // Sanitize sensitive fields
-        SanitizationService.getSanitizer('_id', 'hash', 'refreshTokens', 'createdAt', 'updatedAt', '__v')(newUserDetails);
+        // Remove sensitive fields
+        SanitizationService.removeFields(newUserDetails, '_id', 'hash', 'refreshTokens', 'createdAt', 'updatedAt', '__v');
         
         // Validate password first. 
         ValidationService.validatePassword(newUserDetails.password);
@@ -25,7 +25,7 @@ class RegistrationService {
             if(err.code != 11000)   // 11000 is the error code for Duplicate key error
                 throw err;
             
-            // We have a unique index on email field. So inserting user with existing email will be throw an duplicate key error error
+            // We have a unique index on email field. So inserting user with existing email will be throw an duplicate key error
             throw new ApiError(409, "Email already registered", { email: "Email already registered" });
         }
     }

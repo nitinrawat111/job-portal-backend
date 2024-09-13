@@ -8,7 +8,7 @@ class ApplicationService {
 
     static async submitApplication(jobId, applicantId) {
         // Checking if given jobId is valid or not
-        // Not checking applicantId assuming it is ontained after decoding a JWT token and hence authentic
+        // Not checking applicantId assuming it is obtained after decoding a JWT token and hence authentic
         if (!mongoose.isValidObjectId(jobId))
             throw new ApiError(400, "Invalid job id");
 

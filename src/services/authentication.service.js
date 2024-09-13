@@ -32,14 +32,18 @@ class AuthenticationService {
 
         const foundUser = await UserService.Model.findOne(
             { _id: decoded.userDetails._id },
-            { _id: 0, refreshTokens: 1 }
+            { 
+                _id: 0,
+                // Instead of including entire refreshTokens array, including provided incomingRefreshToken (if it exists in array)
+                // This 'refreshTokens' field will only be included in the result if it contains the given incomingRefreshToken
+                refreshTokens: { $elemMatch: { $eq: incomingRefreshToken } }
+            }
         ).lean().exec();
-
         if (!foundUser)
             throw new ApiError(401, "Unauthorized: User not found");
-            
+        
         // If given token is not found in DB
-        if(!foundUser.refreshTokens.includes(incomingRefreshToken)) {
+        if(!foundUser.refreshTokens) {
             // Refresh Token Reuse detected
             // Invalidating all refresh tokens to logout of all sessions
             await UserService.Model.updateOne(

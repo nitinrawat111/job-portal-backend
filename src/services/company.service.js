@@ -16,7 +16,7 @@ class CompanyService {
     static async register(newCompanyDetails, adminId) {
         // Sanitize sensitive feilds
         // 'admin' and 'recruiter' fields are re-set below. So, no need to sanitize them
-        SanitizationService.getSanitizer('_id', 'createdAt', 'updatedAt', '__v')(newJobDetails);
+        SanitizationService.removeFields(newCompanyDetails, '_id', 'createdAt', 'updatedAt', '__v');
         const newCompany = new this.Model(newCompanyDetails);
         newCompany.admin = adminId;
         newCompany.recruiters = [adminId];

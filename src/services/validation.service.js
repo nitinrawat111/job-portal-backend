@@ -1,6 +1,7 @@
 import validator from "validator";
 import { ApiError } from "../utils/ApiError.js";
 import { isString } from "../utils/extras.js"
+import mongoose from "mongoose";
 
 class ValidationService {
     static validateEmail(email) {
